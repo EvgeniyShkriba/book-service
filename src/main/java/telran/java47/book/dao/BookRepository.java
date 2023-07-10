@@ -1,15 +1,16 @@
 package telran.java47.book.dao;
 
-import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 
 import telran.java47.book.model.Book;
 
 public interface BookRepository extends PagingAndSortingRepository<Book, String> {
-	List<Book> findBooksByAuthors_Name(String authorName);
+	Stream<Book> findByAuthorsName(String name);
 
-	List<Book> findBooksByPublisher_PublisherNameIgnoreCase(String publisherName);
+	Stream<Book> findByPublisherPublisherName(String name);
+	
+	
 
-	List<Book> deleteBooksByAuthors_Name(String authorName);
 }
