@@ -72,6 +72,7 @@ public class BookServiceImpl implements BookService {
 	}
 
 	 @Override
+	 @Transactional(readOnly = true)
 	    public List<BookDto> findBooksByAuthor(String author) {
 	        return bookRepository.findBooksByAuthors_Name(author).stream()
 	                .map(book -> modelMapper.map(book, BookDto.class))
@@ -111,12 +112,13 @@ public class BookServiceImpl implements BookService {
 
 
 	@Override
-	public List<Publisher> findPublishersByAuthorName(String name) {
+	public Set<String> findPublishersByAuthorName(String name) {
+		
 //	    List<Book> books = bookRepository.findBooksByAuthors_Name(name);
 //	    return books.stream()
 //	            .map(Book::getPublisher)
 //	            .collect(Collectors.toList());
-		return null;
+		return publisherRepository.findPublishersByAuthor(name);
 	}
 
 
