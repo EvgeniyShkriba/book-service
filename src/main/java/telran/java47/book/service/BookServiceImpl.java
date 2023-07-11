@@ -2,6 +2,7 @@ package telran.java47.book.service;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.persistence.EntityNotFoundException;
 
@@ -35,11 +36,11 @@ public class BookServiceImpl implements BookService {
 		}
 		//Publisher
 		Publisher publisher = publisherRepository.findById(bookDto.getPublisher())
-				.orElse(publisherRepository.save(new Publisher(bookDto.getPublisher())));
+				.orElseGet(() -> publisherRepository.save(new Publisher(bookDto.getPublisher())));
 		//Authors
 		Set<Author> authors = bookDto.getAuthors().stream()
 				.map(a -> authorRepository.findById(a.getName())
-						.orElse(authorRepository.save(new Author(a.getName(), a.getBirthDate()))))
+						.orElseGet(() -> authorRepository.save(new Author(a.getName(), a.getBirthDate()))))
 				.collect(Collectors.toSet());		
 		Book book = new Book(bookDto.getIsbn(), bookDto.getTitle(), authors, publisher);
 		bookRepository.save(book);
@@ -78,11 +79,11 @@ public class BookServiceImpl implements BookService {
 
 	@Override
 	public Iterable<BookDto> findBooksByPublisher(String publisherName) {
-		Publisher publisher = publisherRepository.findById(publisherName).orElseThrow(EntityNotFoundException::new);
-		return publisher.getBooks().stream()
-				.map(b -> modelMapper.map(b, BookDto.class))
-				.collect(Collectors.toList());
+		Stream<Book> books = bookRepository.findByPublisherPublisherName(publisherName);
+	    return books.map(book -> modelMapper.map(book, BookDto.class)).collect(Collectors.toList());
+	    		
 	}
+
 
 	@Override
 	public Iterable<AuthorDto> findBookAuthors(String isbn) {
@@ -93,11 +94,8 @@ public class BookServiceImpl implements BookService {
 	}
 
 	@Override
-	@Transactional(readOnly = true)
 	public Iterable<String> findPublishersByAuthor(String authorName) {
-		return publisherRepository.findDistinctByBooksAuthorsName(authorName)
-					.map(Publisher::getPublisherName)
-					.collect(Collectors.toList());
+		return publisherRepository.findPublishersByAuthor(authorName);
 	}
 
 	@Override
